@@ -7,7 +7,7 @@ st.subheader('シンプルパテントマップ')
 
 with st.sidebar:
     st.markdown("[マニュアル](https://github.com/SimplePatentMap/tool/blob/main/spmTool_manual.pdf)")
-    st.markdown("[データセット](https://github.com/SimplePatentMap/dataset)")
+    st.markdown("[データセット](https://github.com/simplepatentmap2023/dataset)")
     st.markdown("[J-PlatPat](https://www.j-platpat.inpit.go.jp/)")
 #    st.markdown("[使い方](https://www.j-platpat.inpit.go.jp/)")
 
