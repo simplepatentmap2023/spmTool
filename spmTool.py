@@ -8,7 +8,7 @@ from Tspm import SimplePatentMap
 # from matplotlib import font_manager
 # from PIL import Image, ImageDraw
 # import japanize_matplotlib
-# import xlsxwriter
+import xlsxwriter
 
 st.subheader('シンプルパテントマップ')
 
