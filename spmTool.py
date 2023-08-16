@@ -1,7 +1,14 @@
 from io import BytesIO
+
+import matplotlib
 import pandas as pd
 import streamlit as st
 from Tspm import SimplePatentMap
+import matplotlib.pyplot as plt
+from matplotlib import font_manager
+from PIL import Image, ImageDraw
+import japanize_matplotlib
+#import xlsxwriter
 
 st.subheader('シンプルパテントマップ')
 
@@ -18,17 +25,31 @@ for uploaded_file in uploaded_files:
 
 if len(df) > 1:
     spm = SimplePatentMap()
-    formatted_df = spm.format(df)
+    formattedDF = spm.format(df)
+    appDF = spm.applicants(formattedDF)
+    ipcDF = spm.ipc(formattedDF)
+    heatmapDF = spm.heatmap(formattedDF)
+    #radarchartDF = spm.radarchart(formattedDF, 10)
 
-    st.write(formatted_df)
+    st.write(formattedDF)
 
+    buffer = BytesIO()
+    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+        # Write each dataframe to a different worksheet.
+        appDF.to_excel(writer, sheet_name='筆頭出願人', index=False)
+        ipcDF.to_excel(writer, sheet_name='主分類', index=False)
+        heatmapDF.to_excel(writer, sheet_name='ヒートマップ', index=False)
+        formattedDF.to_excel(writer, sheet_name='データセット', index=False)
 
     #Downloadボタンの追加
-    formatted_df.to_excel(buf := BytesIO(), index=False)
+
+    # formattedDF.to_excel(buf := BytesIO(), index=False)
     st.download_button(
-        "ダウンロード",
-        buf.getvalue(),
-        "SimplePatentMap.xlsx",
+        label="ダウンロード",
+        # buf.getvalue(),
+        data=buffer,
+        file_name="SimplePatentMap.xlsx",
+        mime='application/vnd.ms-excel'
     )
 
 
