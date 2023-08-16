@@ -1,14 +1,14 @@
 from io import BytesIO
 
-import matplotlib
+# import matplotlib
 import pandas as pd
 import streamlit as st
 from Tspm import SimplePatentMap
-import matplotlib.pyplot as plt
-from matplotlib import font_manager
-from PIL import Image, ImageDraw
-import japanize_matplotlib
-#import xlsxwriter
+# import matplotlib.pyplot as plt
+# from matplotlib import font_manager
+# from PIL import Image, ImageDraw
+# import japanize_matplotlib
+# import xlsxwriter
 
 st.subheader('シンプルパテントマップ')
 
