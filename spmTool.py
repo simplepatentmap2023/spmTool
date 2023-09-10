@@ -13,10 +13,10 @@ import xlsxwriter
 st.subheader('シンプルパテントマップ')
 
 with st.sidebar:
-#    st.markdown("[マニュアル](https://github.com/SimplePatentMap/tool/blob/main/spmTool_manual.pdf)")
+    st.markdown("[YouTube](https://www.youtube.com/@simplepatentmap)")
+    st.markdown("[ブログ](https://simplepm.jp/)")
     st.markdown("[データセット](https://github.com/simplepatentmap2023/dataset)")
     st.markdown("[J-PlatPat](https://www.j-platpat.inpit.go.jp/)")
-#    st.markdown("[使い方](https://www.j-platpat.inpit.go.jp/)")
 
 uploaded_files = st.file_uploader("CSVファイルを選択して下さい", accept_multiple_files=True)
 df = pd.DataFrame()
