@@ -4,7 +4,6 @@ from io import BytesIO
 import pandas as pd
 import streamlit as st
 from Tspm import SimplePatentMap
-# import matplotlib.pyplot as plt
 # from matplotlib import font_manager
 # from PIL import Image, ImageDraw
 # import japanize_matplotlib
@@ -21,7 +20,15 @@ with st.sidebar:
 uploaded_files = st.file_uploader("CSVファイルを選択して下さい", accept_multiple_files=True)
 df = pd.DataFrame()
 for uploaded_file in uploaded_files:
-    df = pd.concat([df, pd.read_csv(uploaded_file)])
+
+    if uploaded_file.name.endswith('.csv'):
+        df = pd.concat([df, pd.read_csv(uploaded_file)])
+
+        #CSVの列が、JPPからDLしたCSVになっているかをチェッっく
+
+    else:
+        st.button(uploaded_file.name + 'はCSVファイルではありません。')
+
 
 if len(df) > 1:
     spm = SimplePatentMap()
@@ -29,6 +36,7 @@ if len(df) > 1:
     appDF = spm.applicants(formattedDF)
     ipcDF = spm.ipc(formattedDF)
     heatmapDF = spm.heatmap(formattedDF)
+    #spm.barPlot()
     #radarchartDF = spm.radarchart(formattedDF, 10)
 
     st.write(formattedDF)
