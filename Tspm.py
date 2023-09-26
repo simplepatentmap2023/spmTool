@@ -68,6 +68,7 @@ class SimplePatentMap():
                           margins_name='文献数')
         app = app.sort_values(by='文献数', ascending=False)
         app = app.iloc[:, -1]
+        #なぜか出願人TOP10のインデックスが出力されない。
         app = app.reset_index()
         app = app.drop(index=0)
         return app
