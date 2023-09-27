@@ -4,6 +4,7 @@ from io import BytesIO
 import pandas as pd
 import streamlit as st
 from Tspm import SimplePatentMap
+from TGraph import DrawGraph
 # import matplotlib.pyplot as plt
 # from matplotlib import font_manager
 # from PIL import Image, ImageDraw
@@ -41,8 +42,16 @@ if len(df) > 1:
         heatmapDF.to_excel(writer, sheet_name='ヒートマップ', index=False)
         formattedDF.to_excel(writer, sheet_name='データセット', index=False)
 
-    #Downloadボタンの追加
+    #imageグラフの作成
+    dg = DrawGraph()
+    appTOP30 = formattedDF['筆頭出願人/権利者'].value_counts()
+#    print(appTOP30)
+    appTOP30img = dg.drawBarH(df=appTOP30, rank=3, barColor='#ffa07a', title = '筆頭出願人')
+    appTOP30img
+    #ipcTOP30 = formattedDF['主分類'].value_counts()
+    #ipcTOP30img = dg.drawBarH(df=ipcTOP30, rank=2, barColor='gray', title='主分類')
 
+    #Downloadボタンの追加
     # formattedDF.to_excel(buf := BytesIO(), index=False)
     st.download_button(
         label="ダウンロード",
