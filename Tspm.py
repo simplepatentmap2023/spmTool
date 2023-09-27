@@ -3,11 +3,11 @@ import pandas as pd
 import numpy as np
 
 # import streamlit as st
-
+from TGraph import TGraph
 df = pd.DataFrame()
 
 
-class SimplePatentMap():
+class SimplePatentMap(TGraph):
 
 
     @staticmethod
@@ -53,9 +53,11 @@ class SimplePatentMap():
         year_df = self.makeYearDF(df)
         applicants_df = self.makeApplicantDF(df)
         IPCsDF = self.makeIPCsDF(df)
+
         #        st.write(df[['文献番号', '出願番号', '出願日', '公知日']])
         return pd.concat([df[['文献番号', '出願番号', '出願日', '公知日']],
                           year_df,
+                          df['発明の名称'],
                           applicants_df,
                           IPCsDF,
                           df[['公開番号', '公告番号', '登録番号', '審判番号', 'その他', '文献URL']]
