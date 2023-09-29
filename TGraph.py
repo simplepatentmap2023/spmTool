@@ -1,20 +1,61 @@
-import numpy as np
-
+# import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-from matplotlib.pyplot import subplots
+import math
+# import matplotlib as mpl
+# from matplotlib.pyplot import subplots
 import japanize_matplotlib  # 日本語化matplotlib
 
 
 class DrawGraph():
-    # import seaborn as sns
-    # sns.set(font="IPAexGothic")  # 日本語フォント設定
 
-    def drawBarH(self, df, rank,  barColor, title):
-        fig, axes = plt.subplots(rank, 1, sharex=True, figsize=(6, 8))
-        for i in range(rank):
-            axes[i].set_title(f'{title} TOP{i*10+1}-{i*10+10}')
-            axes[i].barh(df[i:i+10].index, df[i:i+10].values, label=df[i:i+10].values, color=barColor)
-            axes[i].invert_yaxis()
+    def drawBarH(self, series, rank,  barColor, title):
+        appNames = []
+        values = []
+        display_rank = 0
+        previous_value = 0
+
+
+        for count, applicant in enumerate(series.index):
+            # if display_rank > rank:
+            #     break
+            value = series.values[count]
+            if value != previous_value:
+                display_rank = count + 1
+                previous_value = value
+
+            if display_rank > rank:
+                break
+
+            appNames.append(f'{display_rank} {applicant}')
+            values.append(value)
+
+#        for appName in appNames:
+#            print(appName)
+
+        appNames.reverse()
+        values.reverse()
+
+        # 出願人名の最大文字数を確認
+        length = math.ceil(len(max(appNames, key=lambda x: len(x))) / 10)
+
+        #fig, ax = plt.subplots(tight_layout = True)
+        fig = plt.figure(figsize=(6 + length,rank /3), tight_layout=True)
+        fig.suptitle(f'{title} TOP 1-{rank}')
+        ax = fig.add_subplot(111)
+
+        plt.rcParams['font.size'] = 8
+
+        graph = ax.barh(appNames, values, color = barColor)
+        ax.bar_label(graph, labels=values, padding=3, fontsize = 10)
+#        plt.show()
         return fig
+
+
+if __name__ == "__main__":
+    df = pd.read_csv('sampleInStud.csv')
+    series = df['出願人/権利者'].value_counts()
+
+    dg = DrawGraph()
+    dg.drawBarH(series, rank=20, barColor='gray', title='')
+

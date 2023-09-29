@@ -1,10 +1,12 @@
 from io import BytesIO
 
-# import matplotlib
 import pandas as pd
 import streamlit as st
+import matplotlib.pyplot as plt
+import zipfile
 from Tspm import SimplePatentMap
 from TGraph import DrawGraph
+
 # import matplotlib.pyplot as plt
 # from matplotlib import font_manager
 # from PIL import Image, ImageDraw
@@ -23,6 +25,9 @@ uploaded_files = st.file_uploader("CSVファイルを選択して下さい", acc
 df = pd.DataFrame()
 for uploaded_file in uploaded_files:
     df = pd.concat([df, pd.read_csv(uploaded_file)])
+if st.button('sample'):
+    df = pd.read_csv('sampleInStud.csv')
+
 
 if len(df) > 1:
     spm = SimplePatentMap()
@@ -44,10 +49,17 @@ if len(df) > 1:
 
     #imageグラフの作成
     dg = DrawGraph()
-    appTOP30 = formattedDF['筆頭出願人/権利者'].value_counts()
-#    print(appTOP30)
-    appTOP30img = dg.drawBarH(df=appTOP30, rank=3, barColor='#ffa07a', title = '筆頭出願人')
-    appTOP30img
+    appTOP = formattedDF['筆頭出願人/権利者'].value_counts() #appTOP30はSeriesオブジェクト
+    appTOPimg = dg.drawBarH(series=appTOP, rank=30, barColor='#ffa07a', title = '筆頭出願人')
+    appTOPimg
+    appTOPimg.savefig('appTOP.png')
+
+    ipcTOP = formattedDF['主分類'].value_counts()  # appTOP30はSeriesオブジェクト
+    ipcTOPimg = dg.drawBarH(series=ipcTOP, rank=30, barColor='gray', title='主分類')
+    ipcTOPimg
+
+
+
     #ipcTOP30 = formattedDF['主分類'].value_counts()
     #ipcTOP30img = dg.drawBarH(df=ipcTOP30, rank=2, barColor='gray', title='主分類')
 

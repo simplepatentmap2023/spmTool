@@ -3,11 +3,10 @@ import pandas as pd
 import numpy as np
 
 # import streamlit as st
-from TGraph import TGraph
 df = pd.DataFrame()
 
 
-class SimplePatentMap(TGraph):
+class SimplePatentMap():
 
 
     @staticmethod
