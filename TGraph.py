@@ -40,14 +40,15 @@ class DrawGraph():
         length = math.ceil(len(max(appNames, key=lambda x: len(x))) / 10)
 
         #fig, ax = plt.subplots(tight_layout = True)
-        fig = plt.figure(figsize=(6 + length,rank /3), tight_layout=True)
+        fig = plt.figure(figsize=(8+length, rank/4), tight_layout=True)
         fig.suptitle(f'{title} TOP 1-{rank}')
+        plt.subplots_adjust(top=0.85, hspace=0.6)
         ax = fig.add_subplot(111)
 
-        plt.rcParams['font.size'] = 8
+#        plt.rcParams['font.size'] = 8
 
         graph = ax.barh(appNames, values, color = barColor)
-        ax.bar_label(graph, labels=values, padding=3, fontsize = 10)
+        ax.bar_label(graph, labels=values, padding=2, fontsize = 8)
 #        plt.show()
         return fig
 

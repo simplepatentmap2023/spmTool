@@ -1,4 +1,5 @@
 from io import BytesIO
+import os
 
 import pandas as pd
 import streamlit as st
@@ -7,13 +8,10 @@ import zipfile
 from Tspm import SimplePatentMap
 from TGraph import DrawGraph
 
-# import matplotlib.pyplot as plt
-# from matplotlib import font_manager
-# from PIL import Image, ImageDraw
-# import japanize_matplotlib
-import xlsxwriter
 
 st.subheader('シンプルパテントマップ')
+spm = SimplePatentMap()
+df = pd.DataFrame()
 
 with st.sidebar:
     st.markdown("[YouTube](https://www.youtube.com/@simplepatentmap)")
@@ -21,16 +19,28 @@ with st.sidebar:
     st.markdown("[データセット](https://github.com/simplepatentmap2023/dataset)")
     st.markdown("[J-PlatPat](https://www.j-platpat.inpit.go.jp/)")
 
+    sample_btn = st.button('sample', key='sample_btn')
+
+    if sample_btn:
+        df = pd.read_csv('sampleInStud.csv')
+
+
+
 uploaded_files = st.file_uploader("CSVファイルを選択して下さい", accept_multiple_files=True)
-df = pd.DataFrame()
 for uploaded_file in uploaded_files:
     df = pd.concat([df, pd.read_csv(uploaded_file)])
-if st.button('sample'):
-    df = pd.read_csv('sampleInStud.csv')
+
+    # if uploaded_file.name.endswith('.csv'):
+    #     st.write(f'{uploaded_files}はCSVファイルではありません。')
+    # else:
+    #     df = pd.concat([df, pd.read_csv(uploaded_file)])
+
+# st.button('sample')
+
 
 
 if len(df) > 1:
-    spm = SimplePatentMap()
+#    spm = SimplePatentMap()
     formattedDF = spm.format(df)
     appDF = spm.applicants(formattedDF)
     ipcDF = spm.ipc(formattedDF)
@@ -47,12 +57,11 @@ if len(df) > 1:
         heatmapDF.to_excel(writer, sheet_name='ヒートマップ', index=False)
         formattedDF.to_excel(writer, sheet_name='データセット', index=False)
 
-    #imageグラフの作成
+    # imageグラフの作成
     dg = DrawGraph()
     appTOP = formattedDF['筆頭出願人/権利者'].value_counts() #appTOP30はSeriesオブジェクト
     appTOPimg = dg.drawBarH(series=appTOP, rank=30, barColor='#ffa07a', title = '筆頭出願人')
     appTOPimg
-    appTOPimg.savefig('appTOP.png')
 
     ipcTOP = formattedDF['主分類'].value_counts()  # appTOP30はSeriesオブジェクト
     ipcTOPimg = dg.drawBarH(series=ipcTOP, rank=30, barColor='gray', title='主分類')
@@ -60,11 +69,9 @@ if len(df) > 1:
 
 
 
-    #ipcTOP30 = formattedDF['主分類'].value_counts()
-    #ipcTOP30img = dg.drawBarH(df=ipcTOP30, rank=2, barColor='gray', title='主分類')
 
-    #Downloadボタンの追加
-    # formattedDF.to_excel(buf := BytesIO(), index=False)
+#    Downloadボタンの追加
+    formattedDF.to_excel(buf := BytesIO(), index=False)
     st.download_button(
         label="ダウンロード",
         # buf.getvalue(),
