@@ -9,6 +9,7 @@ df = pd.DataFrame()
 class SimplePatentMap():
 
 
+
     @staticmethod
     def makeYearDF(df):
         year_df = pd.DataFrame()
@@ -48,10 +49,68 @@ class SimplePatentMap():
 
     #    @st.cache_data
     def format(self, df):
-        df.index = np.arange(1, len(df) + 1)
-        year_df = self.makeYearDF(df)
-        applicants_df = self.makeApplicantDF(df)
-        IPCsDF = self.makeIPCsDF(df)
+
+        #出願年、公知年の作成
+        df['出願年'] = df['出願日'].str[:4]
+        df['公知年'] = df['公知日'].str[:4]
+
+#        df.index = np.arange(1, len(df) + 1)
+#        year_df = self.makeYearDF(df)
+
+        #筆頭出願人、共同出願人の作成
+        for applicants in df['出願人/権利者'].fillna('-'):
+            appList = applicants.split(',')
+            df['筆頭出願人/権利者'] = appList.pop(0)
+            df['共同出願人/権利者'] = '単独' if len(appList)==0 else ';'.join(appList)
+
+        #IPCの作成
+        regEXP = re.compile('(([A-H]\d\d[A-Z]\d+/)\d+)')
+
+        for FIs in df['FI'].fillna('-'):
+            try:  # FI列がIPCのフォーマットに一致するかTry
+                IPCs = regEXP.findall(FIs)
+            except:  # FI列がIPCのフォーマットに一致しない場合
+                df['主分類（mg）'] = 'not FI(s)'
+                df['主分類以外（mg）'] = '-'
+                df['主分類以外(sg)'] = 'not FI(s)'
+                df['主分類以外(sg)'] = '-'
+            else:  # FI列がIPCのフォーマットに一致した場合（正常処理）
+                for IPC in IPCs:
+                    df['主分類(mg)'] = IPC[1]
+                IPCsDF.at[index, '主分類'] = IPCs.pop(0) if len(IPCs) > 0 else '-'
+
+        fi_series = df['FI'].fillna('-')
+
+        for index, FI in fi_series.items():
+            try: #FI列がIPCのフォーマットに一致するかTry
+                IPCs = regEXP.findall(FI)
+            except: #FI列がIPCのフォーマットに一致しない場合
+                df.at[index, '主分類'] = 'not FI(s)'
+                df.at[index, '主分類以外'] = '-'
+            else: #FI列がIPCのフォーマットに一致した場合（正常処理）
+                for IPC in IPCs:
+                    df['主分類']
+                IPCsDF.at[index, '主分類'] = IPCs.pop(0) if len(IPCs) > 0 else '-'
+                # 重複を排除
+                IPCs = dict.fromkeys(IPCs)
+                IPCsDF.at[index, '主分類以外'] = ';'.join(IPCs)
+
+        return IPCsDF
+
+
+
+
+#        applicants_series = df['出願人/権利者'].fillna('-')
+#        for index, value in applicants_series.items():
+#             applicants = value.split(',')
+#             applicant_df.at[index, '筆頭出願人/権利者'] = applicants.pop(0)
+#             coapplicants = ('単独' if len(applicants) == 0 else ';'.join(applicants))
+#             applicant_df.at[index, '共同出願人/権利者'] = coapplicants
+#         return applicant_df
+
+
+#       applicants_df = self.makeApplicantDF(df)
+#        IPCsDF = self.makeIPCsDF(df)
 
         #        st.write(df[['文献番号', '出願番号', '出願日', '公知日']])
         return pd.concat([df[['文献番号', '出願番号', '出願日', '公知日']],

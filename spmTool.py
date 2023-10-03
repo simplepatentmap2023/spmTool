@@ -30,22 +30,12 @@ uploaded_files = st.file_uploader("CSVファイルを選択して下さい", acc
 for uploaded_file in uploaded_files:
     df = pd.concat([df, pd.read_csv(uploaded_file)])
 
-    # if uploaded_file.name.endswith('.csv'):
-    #     st.write(f'{uploaded_files}はCSVファイルではありません。')
-    # else:
-    #     df = pd.concat([df, pd.read_csv(uploaded_file)])
-
-# st.button('sample')
-
-
 
 if len(df) > 1:
-#    spm = SimplePatentMap()
     formattedDF = spm.format(df)
     appDF = spm.applicants(formattedDF)
     ipcDF = spm.ipc(formattedDF)
     heatmapDF = spm.heatmap(formattedDF)
-    #radarchartDF = spm.radarchart(formattedDF, 10)
 
     st.write(formattedDF)
 
@@ -59,18 +49,19 @@ if len(df) > 1:
 
     # imageグラフの作成
     dg = DrawGraph()
+    fig, ax = plt.subplots(nrows=1, ncols=2, sharey=False, squeeze=True)
+
     appTOP = formattedDF['筆頭出願人/権利者'].value_counts() #appTOP30はSeriesオブジェクト
-    appTOPimg = dg.drawBarH(series=appTOP, rank=30, barColor='#ffa07a', title = '筆頭出願人')
-    appTOPimg
+    ipcTOP = formattedDF['主分類'].value_counts()
 
-    ipcTOP = formattedDF['主分類'].value_counts()  # appTOP30はSeriesオブジェクト
-    ipcTOPimg = dg.drawBarH(series=ipcTOP, rank=30, barColor='gray', title='主分類')
-    ipcTOPimg
+    appTOP_img = dg.drawBarH(series=appTOP, rank=30, barColor='#ffa07a', title='筆頭出願人')
+    ipcTOP_img = dg.drawBarH(series=ipcTOP, rank=30, barColor='gray', title='主分類')
+
+    appTOP_img
+    ipcTOP_img
 
 
-
-
-#    Downloadボタンの追加
+    #    Downloadボタンの追加
     formattedDF.to_excel(buf := BytesIO(), index=False)
     st.download_button(
         label="ダウンロード",
