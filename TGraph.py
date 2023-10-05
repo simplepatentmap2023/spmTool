@@ -7,7 +7,37 @@ import math
 import japanize_matplotlib  # 日本語化matplotlib
 
 
-class DrawGraph():
+class DrawGraph:
+
+    def __init__(self, formattedDF):
+
+        appSeries = formattedDF['筆頭出願人/権利者']
+        rankIndex = rankindex(appSeries)
+
+    def rankindex(self, appSeies):
+        rankIndex = []
+        values = []
+        display_rank = 0
+        previous_value = 0
+
+        for count, applicant in enumerate(appSeries.index):
+            value = series.values[count]
+            if value != previous_value:
+                display_rank = count + 1
+                previous_value = value
+
+            if display_rank > rank:
+                break
+
+            appNames.append(f'{display_rank} {applicant}')
+            values.append(value)
+
+        # グラフを降順に表示するためにreverseする。
+        appNames.reverse()
+        values.reverse()
+
+        return rankIndex
+
 
     def drawBarH(self, series, rank,  barColor, title):
         appNames = []

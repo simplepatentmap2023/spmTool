@@ -33,32 +33,32 @@ for uploaded_file in uploaded_files:
 
 if len(df) > 1:
     formattedDF = spm.format(df)
-    appDF = spm.applicants(formattedDF)
-    ipcDF = spm.ipc(formattedDF)
-    heatmapDF = spm.heatmap(formattedDF)
+    #appDF = spm.applicants(formattedDF)
+    # ipcDF = spm.ipc(formattedDF)
+    # heatmapDF = spm.heatmap(formattedDF)
 
     st.write(formattedDF)
 
     buffer = BytesIO()
     with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
         # Write each dataframe to a different worksheet.
-        appDF.to_excel(writer, sheet_name='筆頭出願人', index=False)
-        ipcDF.to_excel(writer, sheet_name='主分類', index=False)
-        heatmapDF.to_excel(writer, sheet_name='ヒートマップ', index=False)
+        # appDF.to_excel(writer, sheet_name='筆頭出願人', index=False)
+        # ipcDF.to_excel(writer, sheet_name='主分類', index=False)
+        # heatmapDF.to_excel(writer, sheet_name='ヒートマップ', index=False)
         formattedDF.to_excel(writer, sheet_name='データセット', index=False)
 
     # imageグラフの作成
-    dg = DrawGraph()
+    dg = DrawGraph(formattedDF=formattedDF)
     fig, ax = plt.subplots(nrows=1, ncols=2, sharey=False, squeeze=True)
 
-    appTOP = formattedDF['筆頭出願人/権利者'].value_counts() #appTOP30はSeriesオブジェクト
-    ipcTOP = formattedDF['主分類'].value_counts()
-
-    appTOP_img = dg.drawBarH(series=appTOP, rank=30, barColor='#ffa07a', title='筆頭出願人')
-    ipcTOP_img = dg.drawBarH(series=ipcTOP, rank=30, barColor='gray', title='主分類')
-
-    appTOP_img
-    ipcTOP_img
+    # appTOP = formattedDF['筆頭出願人/権利者'].value_counts() #appTOP30はSeriesオブジェクト
+    # ipcTOP = formattedDF['主分類'].value_counts()
+    #
+    # appTOP_img = dg.drawBarH(series=appTOP, rank=30, barColor='#ffa07a', title='筆頭出願人')
+    # ipcTOP_img = dg.drawBarH(series=ipcTOP, rank=30, barColor='gray', title='主分類')
+    #
+    # appTOP_img
+    # ipcTOP_img
 
 
     #    Downloadボタンの追加
