@@ -12,7 +12,7 @@ class DrawGraph:
     def __init__(self, formattedDF):
 
         appSeries = formattedDF['筆頭出願人/権利者']
-        rankIndex = rankindex(appSeries)
+        #rankIndex = rankindex(appSeries)
 
     def rankindex(self, appSeies):
         rankIndex = []

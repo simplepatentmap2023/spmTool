@@ -5,7 +5,11 @@ import numpy as np
 df = pd.DataFrame()
 
 
-class SimplePatentMap():
+class SimplePatentMap:
+    def __int__(self, df):
+        self.df = df
+        # formattedDF = pd.DataFrame()
+        # appRankingDF = pd.DataFrame()
 
     #筆頭出願人か共同出願人かを分ける
     def applicants(self, series):
@@ -71,17 +75,17 @@ class SimplePatentMap():
                             '公開番号', '公告番号', '登録番号', '審判番号', 'その他', '文献URL'])
         return df
 
-    # def applicants(self, formattedDF):
-    #     app = pd.crosstab(index=formattedDF['筆頭出願人/権利者'],
-    #                       columns=formattedDF['文献番号'],
-    #                       margins=True,
-    #                       margins_name='文献数')
-    #     app = app.sort_values(by='文献数', ascending=False)
-    #     app = app.iloc[:, -1]
-    #     #なぜか出願人TOP10のインデックスが出力されない。
-    #     app = app.reset_index()
-    #     app = app.drop(index=0)
-    #     return app
+    def appDF(self, formattedDF):
+        appDF = pd.crosstab(index=formattedDF['筆頭出願人/権利者'],
+                          columns=formattedDF['文献番号'],
+                          margins=True,
+                          margins_name='文献数')
+        appDF = appDF.sort_values(by='文献数', ascending=False)
+#        appDF = appDF.iloc[:, -1]
+        #なぜか出願人TOP10のインデックスが出力されない。
+        #appDF = appDF.reset_index()
+        #appDF = appDF.drop(index=0)
+        return appDF
 
     def ipc(self, formattedDF):
         ipc = pd.crosstab(index=formattedDF['主分類'],
