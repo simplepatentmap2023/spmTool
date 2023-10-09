@@ -32,17 +32,20 @@ class SimplePatentMap:
 
             else: #FIが記載されている場合（通常処理）
                 mainIPC = IPCs.pop(0)
+                #主分類はここで処理されている
                 mainIPCmg.append(mainIPC[1])
                 mainIPCsg.append(mainIPC[0])
 
-                # df['主文類（mg）'] = mainIPCmg
-                # df['主文類（sg）'] = mainIPCsg
-
+                #主分類以外を抽出する
                 sg = []
                 mg = []
                 for list in IPCs:
                     sg.append(list[0])
                     mg.append(list[1])
+
+                #重複を削除する。
+                sg = dict.fromkeys(sg)
+                mg = dict.fromkeys(mg)
 
                 sg = ';'.join(sg)
                 mg = ';'.join(mg)
@@ -93,7 +96,6 @@ class SimplePatentMap:
 
         #二つのdataframeを結合
         rankingDF = pd.merge(df, rank,on=columns)
-        #rankingDF = pd.merge(df, rank, on=columns)
 
         #indexになっているcolumnsを列にする（筆頭出願人の場合、indexになっている筆頭出願人を列の値にする
         rankingDF.reset_index(inplace=True)
@@ -130,23 +132,22 @@ if len(df) > 1:
 
     st.write(formattedDF)
 
-    subjects = np.array(["math", "physics", "chemistry", "earth science"])
-    scores = np.array([80, 95, 45, 65])
-    fig, ax = plt.subplots()
-    fig.subplots_adjust(left=0.2)
-    ax.barh(subjects, scores)
-    plt.show()
-
-    #イメージファイルの作成（出願人TOP30、IPC(mg)TOP30）
-    subjects = np.array(["math", "physics", "chemistry", "earth science"])
-    scores = np.array([80, 95, 45, 65])
-
-    fig, ax = plt.subplots()
-    fig.subplots_adjust(left=0.2)
-
-    ax.barh(subjects, scores)
-
-    plt.show()
+    # subjects = np.array(["math", "physics", "chemistry", "earth science"])
+    # scores = np.array([80, 95, 45, 65])
+    # fig, ax = plt.subplots()
+    # fig.subplots_adjust(left=0.2)
+    # ax.barh(subjects, scores)
+    # plt.show()
+    #
+    # #イメージファイルの作成（出願人TOP30、IPC(mg)TOP30）
+    # subjects = np.array(["math", "physics", "chemistry", "earth science"])
+    # scores = np.array([80, 95, 45, 65])
+    #
+    # fig, ax = plt.subplots()
+    # fig.subplots_adjust(left=0.2)
+    #
+    # ax.barh(subjects, scores)
+    # fig
 
 
 
