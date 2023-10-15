@@ -1,16 +1,15 @@
+# import io
 from io import BytesIO
 import os
-import re
 
+import tempfile
+import re
+import japanize_matplotlib
 import pandas as pd
 import numpy as np
 import streamlit as st
 import matplotlib.pyplot as plt
-
-
-import zipfile
-#import Tspm
-from TGraph import DrawGraph
+import shutil
 
 
 
@@ -106,6 +105,24 @@ class SimplePatentMap:
 
         return rankingDF
 
+    def drawBarh(self, df, title, to, barColor='b', BGColor='w'):
+        df = df.query('ランキング < @to')
+        xticks = []
+        for i, rank in enumerate(df['ランキング']):
+            xticks.append(':'.join([str(int(rank)), df[title][i+1]]))
+        xticks.reverse()
+        value = df['件数'][::-1]
+        fig = plt.figure(figsize=(12, 8), tight_layout = True)  # ...1
+        ax = fig.add_subplot(111)  # ...2
+        graph = ax.barh(xticks, value, label=title, color=barColor)  # ...3
+        ax.bar_label(graph, labels=value, padding=3, fontsize=8)
+        plt.gca().spines['right'].set_visible(False)
+        plt.gca().spines['top'].set_visible(False)
+        plt.title(title)
+
+        return fig
+
+
 st.subheader('シンプルパテントマップ')
 df = pd.DataFrame()
 
@@ -115,13 +132,19 @@ with st.sidebar:
     st.markdown("[データセット](https://github.com/simplepatentmap2023/dataset)")
     st.markdown("[J-PlatPat](https://www.j-platpat.inpit.go.jp/)")
 
-    sample_btn = st.button('sample', key='sample_btn')
-    if sample_btn:
-        df = pd.read_csv('sampleInStud.csv')
+    # sample_btn = st.button('sample', key='sample_btn')
+    # if sample_btn:
+    #     df = pd.read_csv('sampleInStud.csv')
 
 uploaded_files = st.file_uploader("CSVファイルを選択して下さい", accept_multiple_files=True)
 for uploaded_file in uploaded_files:
     df = pd.concat([df, pd.read_csv(uploaded_file)])
+    st.session_state['dataframe']=True
+
+st.text('スタッド溶接に関する特許情報をサンプルとして表示します。')
+sample_btn = st.button('sample')
+if sample_btn:
+    df = pd.read_csv('sampleInStud.csv')
 
 if len(df) > 1:
     spm = SimplePatentMap(df)
@@ -130,28 +153,6 @@ if len(df) > 1:
     IPCmgRankingDF = spm.ranking(formattedDF, '主分類（mg）')
     IPCsgRankingDF = spm.ranking(formattedDF, '主分類（sg）')
 
-    st.write(formattedDF)
-
-    # subjects = np.array(["math", "physics", "chemistry", "earth science"])
-    # scores = np.array([80, 95, 45, 65])
-    # fig, ax = plt.subplots()
-    # fig.subplots_adjust(left=0.2)
-    # ax.barh(subjects, scores)
-    # plt.show()
-    #
-    # #イメージファイルの作成（出願人TOP30、IPC(mg)TOP30）
-    # subjects = np.array(["math", "physics", "chemistry", "earth science"])
-    # scores = np.array([80, 95, 45, 65])
-    #
-    # fig, ax = plt.subplots()
-    # fig.subplots_adjust(left=0.2)
-    #
-    # ax.barh(subjects, scores)
-    # fig
-
-
-
-    #ダウンロードファイル（エクセル）の書き出し準備
     buffer = BytesIO()
     with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
         # Write each dataframe to a different worksheet.
@@ -161,16 +162,20 @@ if len(df) > 1:
         # heatmapDF.to_excel(writer, sheet_name='ヒートマップ', index=False)
         formattedDF.to_excel(writer, sheet_name='データセット', index=False)
 
+    st.write(formattedDF)
 
-
-    #    Downloadボタンの追加
-    #spm.formattedDF.to_excel(buf := BytesIO(), index=False)
     st.download_button(
         label="ダウンロード",
-        # buf.getvalue(),
         data=buffer,
         file_name="SimplePatentMap.xlsx",
-        mime='application/vnd.ms-excel'
+        mime='application/octet-stream'
     )
 
 
+
+    #ランキングデータフレームを可視化
+    fig1 = spm.drawBarh(df=appRankingDF, title='筆頭出願人/権利者', to=30,barColor='navajowhite', BGColor='oldlace')
+    fig2 = spm.drawBarh(df=IPCmgRankingDF, title='主分類（mg）', to=30, barColor='darkgrey', BGColor='whitesmoke')
+
+    fig1
+    fig2

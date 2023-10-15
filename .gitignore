@@ -1,5 +1,9 @@
-sampleInStud.csv
+.gitignore 2
 test.py
 TGraph.py
 Tspm.py
-
+appTOP.png
+appTOP 2.png
+archive_shutil.zip
+simplepatentmap.zip
+TWordCloud.py
