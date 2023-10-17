@@ -147,6 +147,7 @@ if st.button('sample'):
     df = pd.read_csv('sampleInStud.csv')
 
 
+
 # elif st.session_state['sample_btn'] == True:
 #     if st.button('クリア'):
 #         df.drop('all')
