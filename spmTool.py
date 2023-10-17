@@ -139,12 +139,24 @@ with st.sidebar:
 uploaded_files = st.file_uploader("CSVファイルを選択して下さい", accept_multiple_files=True)
 for uploaded_file in uploaded_files:
     df = pd.concat([df, pd.read_csv(uploaded_file)])
-    st.session_state['dataframe']=True
+#    st.session_state['dataframe']=True
 
 st.text('スタッド溶接に関する特許情報をサンプルとして表示します。')
-sample_btn = st.button('sample')
-if sample_btn:
+if st.button('sample'):
+    st.session_state['sample_btn'] = True
     df = pd.read_csv('sampleInStud.csv')
+
+
+# elif st.session_state['sample_btn'] == True:
+#     if st.button('クリア'):
+#         df.drop('all')
+#         st.session_state['sample_btn'] = False
+# else:
+#     st.text('スタッド溶接に関する特許情報をサンプルとして表示します。')
+#     if st.button('sample'):
+#         st.session_state['sample_btn'] = True
+#         df = pd.read_csv('sampleInStud.csv')
+
 
 if len(df) > 1:
     spm = SimplePatentMap(df)
