@@ -136,9 +136,10 @@ with st.sidebar:
     # if sample_btn:
     #     df = pd.read_csv('sampleInStud.csv')
 
-uploaded_files = st.file_uploader("CSVファイルを選択して下さい", accept_multiple_files=True)
+uploaded_files = st.file_uploader("CSVファイルを選択して下さい", type='csv', accept_multiple_files=True)
 for uploaded_file in uploaded_files:
     df = pd.concat([df, pd.read_csv(uploaded_file)])
+
 #    st.session_state['dataframe']=True
 
 st.text('スタッド溶接に関する特許情報をサンプルとして表示します。')
