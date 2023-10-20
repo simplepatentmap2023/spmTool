@@ -222,7 +222,7 @@ for uploaded_file in uploaded_files:
 
 #    st.session_state['dataframe']=True
 
-st.text('スタッド溶接に関する特許情報をサンプルとして表示します。')
+st.text('CO2の吸収分離に関する特許情報（20010101-20221231）をサンプルとして表示します。')
 if st.button('sample'):
 #    st.session_state['sample_btn'] = True
     #print([f'読み込んだCSVは{file}' for file in glob.glob('./sample/*.csv')])
