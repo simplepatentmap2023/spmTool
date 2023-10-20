@@ -1,16 +1,34 @@
-# import io
-from io import BytesIO
-import os
-
-import tempfile
-import re
-import japanize_matplotlib
+import streamlit as st
 import pandas as pd
 import numpy as np
-import streamlit as st
-import matplotlib.pyplot as plt
-import shutil
 
+#sampleファイルの読み込みに利用
+import glob
+# 正規表現のマッチに利用
+import re
+
+#データのグラフ化に利用
+import matplotlib.pyplot as plt
+import japanize_matplotlib
+
+#エクセルファイルの出力に利用
+from io import BytesIO
+
+#WordCloudに利用
+import unicodedata
+
+# janomeを使った形態素解析
+from janome.tokenizer import Tokenizer
+
+# ワードクラウドによる頻出単語の可視化
+from wordcloud import WordCloud
+
+
+# import shutil
+# import io
+# import os
+# import tempfile
+#------import文の終了------
 
 
 class SimplePatentMap:
@@ -122,7 +140,69 @@ class SimplePatentMap:
 
         return fig
 
+    def drawWordCloud(self, df, columns):
+        text = df[columns].values.tolist()
+        text = ''.join(map(str, text))
+        text = re.sub('、', '', text)
+        text = re.sub('‐', '', text)
+        text = re.sub('「', '', text)
+        text = re.sub('」', '', text)
+        text = re.sub('（', '', text)
+        text = re.sub('）', '', text)
+        text = re.sub('【', '', text)
+        text = re.sub('】', '', text)
+        text = re.sub('<BR>', '', text)
 
+        text = unicodedata.normalize('NFKC', text)
+#        st.write('UNICODEの正規化後：{}'.format(text))
+
+        # 対象のテキストをtokenizeする
+        t = Tokenizer()
+        tokenized_text = t.tokenize(text)
+        words_list = []
+
+        # tokenizeされたテキストをfor文を使ってhinshiとhinshi2に格納する。
+        for token in tokenized_text:
+            tokenized_word = token.surface
+            hinshi = token.part_of_speech.split(',')[0]
+            hinshi2 = token.part_of_speech.split(',')[1]
+            # 抜き出す品詞を指定する
+            if hinshi == "名詞":
+                if (hinshi2 != "数") and (hinshi2 != "代名詞") and (hinshi2 != "非自立"):
+                    words_list.append(tokenized_word)
+
+        words_wakachi = " ".join(words_list)
+#        st.write(words_wakachi)
+
+        font = 'ipaexg.ttf'
+
+        # 意味なさそうな単語（ストップワード）を除去する。
+        stopWords = ['ので', 'そう', 'から', 'ため']
+        stopWords += ['方法', '装置', '構造', '材料', '手段', '含有', '選択']
+        # stopWords += ['型', '器', '機', '基', '具', '材', '式', '図', '性', '物', '用', '体', '治', '部', '品', '剤']
+        stopWords += ['型', '基', '具', '式', '図', '性', '物', '用', '体', '治', '部', '品', '剤']
+        stopWords += ['(57)', '要約', '課題', '解決手段', '特徴とする', '本発明の課題は', '選択図', '図','前記', '解決','提供','上記', 'なし']
+
+        # WordCloudを表示
+
+        word_cloud =  WordCloud(font_path=font, width=1500, height=900,
+                               stopwords=set(stopWords), min_font_size=5,
+                               collocations=False, background_color='white',
+                               max_words=400).generate(words_wakachi)
+        fig = plt.figure(figsize=(15, 10))
+        fig.suptitle(f"{columns}に含まれる主なキーワード", size=18, y=0.90)
+        plt.imshow(word_cloud)
+        plt.tick_params(labelbottom=False, labelleft=False)
+        plt.xticks([])
+        plt.yticks([])
+        # plt.show()
+        # figure.savefig("Word_Cloud.png")
+
+        return fig
+
+
+
+#------画面の描画------
 st.subheader('シンプルパテントマップ')
 df = pd.DataFrame()
 
@@ -144,8 +224,11 @@ for uploaded_file in uploaded_files:
 
 st.text('スタッド溶接に関する特許情報をサンプルとして表示します。')
 if st.button('sample'):
-    st.session_state['sample_btn'] = True
-    df = pd.read_csv('sampleInStud.csv')
+#    st.session_state['sample_btn'] = True
+    #print([f'読み込んだCSVは{file}' for file in glob.glob('./sample/*.csv')])
+    for sample in glob.glob('./sample/*.csv'):
+        df = pd.concat([df, pd.read_csv(sample)])
+#df = pd.read_csv('sampleInStud.csv')
 
 
 
@@ -166,6 +249,7 @@ if len(df) > 1:
     appRankingDF = spm.ranking(formattedDF, '筆頭出願人/権利者')
     IPCmgRankingDF = spm.ranking(formattedDF, '主分類（mg）')
     IPCsgRankingDF = spm.ranking(formattedDF, '主分類（sg）')
+
 
     buffer = BytesIO()
     with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
@@ -190,6 +274,12 @@ if len(df) > 1:
     #ランキングデータフレームを可視化
     fig1 = spm.drawBarh(df=appRankingDF, title='筆頭出願人/権利者', to=30,barColor='navajowhite', BGColor='oldlace')
     fig2 = spm.drawBarh(df=IPCmgRankingDF, title='主分類（mg）', to=30, barColor='darkgrey', BGColor='whitesmoke')
+    fig3 = spm.drawWordCloud(df = df, columns = '発明の名称')
 
     fig1
     fig2
+    fig3
+
+    if '要約' in df.columns:
+        fig4 = spm.drawWordCloud(df = df, columns = '要約')
+        fig4
