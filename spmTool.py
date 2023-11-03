@@ -2,8 +2,12 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
+#一時ファイルの書き込みに使う
+import tempfile
+import os
 #sampleファイルの読み込みに利用
 import glob
+
 # 正規表現のマッチに利用
 import re
 
@@ -13,6 +17,10 @@ import japanize_matplotlib
 
 #エクセルファイルの出力に利用
 from io import BytesIO
+
+#zipファイルの書き込み用に利用
+import os
+import zipfile
 
 #WordCloudに利用
 import unicodedata
@@ -133,9 +141,12 @@ class SimplePatentMap:
         fig = plt.figure(figsize=(12, 8), tight_layout = True)  # ...1
         ax = fig.add_subplot(111)  # ...2
         graph = ax.barh(xticks, value, label=title, color=barColor)  # ...3
-        ax.bar_label(graph, labels=value, padding=3, fontsize=8)
+        ax.bar_label(graph, labels=value, padding=3, fontsize=len(xticks)/8)
+        # labelsizeで軸の数字の文字サイズ変更
+#        plt.tick_params(labelsize=len(xticks))
         plt.gca().spines['right'].set_visible(False)
         plt.gca().spines['top'].set_visible(False)
+#        plt.rcParams["font.size"] = 17
         plt.title(title)
 
         return fig
@@ -177,7 +188,7 @@ class SimplePatentMap:
         font = 'ipaexg.ttf'
 
         # 意味なさそうな単語（ストップワード）を除去する。
-        stopWords = ['ので', 'そう', 'から', 'ため']
+        stopWords = ['ので', 'そう', 'から', 'ため', 'その', 'それの','それぞれ']
         stopWords += ['方法', '装置', '構造', '材料', '手段', '含有', '選択']
         # stopWords += ['型', '器', '機', '基', '具', '材', '式', '図', '性', '物', '用', '体', '治', '部', '品', '剤']
         stopWords += ['型', '基', '具', '式', '図', '性', '物', '用', '体', '治', '部', '品', '剤']
@@ -212,9 +223,6 @@ with st.sidebar:
     st.markdown("[データセット](https://github.com/simplepatentmap2023/dataset)")
     st.markdown("[J-PlatPat](https://www.j-platpat.inpit.go.jp/)")
 
-    # sample_btn = st.button('sample', key='sample_btn')
-    # if sample_btn:
-    #     df = pd.read_csv('sampleInStud.csv')
 
 uploaded_files = st.file_uploader("CSVファイルを選択して下さい", type='csv', accept_multiple_files=True)
 for uploaded_file in uploaded_files:
@@ -228,19 +236,8 @@ if st.button('sample'):
     #print([f'読み込んだCSVは{file}' for file in glob.glob('./sample/*.csv')])
     for sample in glob.glob('./sample/*.csv'):
         df = pd.concat([df, pd.read_csv(sample)])
-#df = pd.read_csv('sampleInStud.csv')
 
 
-
-# elif st.session_state['sample_btn'] == True:
-#     if st.button('クリア'):
-#         df.drop('all')
-#         st.session_state['sample_btn'] = False
-# else:
-#     st.text('スタッド溶接に関する特許情報をサンプルとして表示します。')
-#     if st.button('sample'):
-#         st.session_state['sample_btn'] = True
-#         df = pd.read_csv('sampleInStud.csv')
 
 
 if len(df) > 1:
@@ -262,14 +259,6 @@ if len(df) > 1:
 
     st.write(formattedDF)
 
-    st.download_button(
-        label="ダウンロード",
-        data=buffer,
-        file_name="SimplePatentMap.xlsx",
-        mime='application/octet-stream'
-    )
-
-
 
     #ランキングデータフレームを可視化
     fig1 = spm.drawBarh(df=appRankingDF, title='筆頭出願人/権利者', to=30,barColor='navajowhite', BGColor='oldlace')
@@ -279,7 +268,13 @@ if len(df) > 1:
     fig1
     fig2
     fig3
-
     if '要約' in df.columns:
-        fig4 = spm.drawWordCloud(df = df, columns = '要約')
+        fig4 = spm.drawWordCloud(df=df, columns='要約')
         fig4
+
+    st.download_button(
+        label="ダウンロード",
+        data=buffer,
+        file_name="SimplePatentMap.xlsx",
+        mime='application/octet-stream'
+    )
