@@ -119,8 +119,8 @@ class SimplePatentMap:
         rankingDF = rankingDF.reindex(columns=['ランキング', columns, '件数'])
 
         #indexを1から振り直す
-        rankingDF.index = np.arange(1, len(rankingDF) + 1)
-
+#        rankingDF.index = np.arange(1, len(rankingDF) + 1)
+        rankingDF.index = rankingDF.index + 1
         return rankingDF
 
     def drawBarh(self, df, title, to, barColor='b', BGColor='w'):
@@ -251,23 +251,126 @@ if len(df) > 1:
     IPCsgRankingDF = spm.ranking(formattedDF, '主分類（sg）')
 
 
-    buffer = BytesIO()
-    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+    # excelBuffer = BytesIO()
+    # with pd.ExcelWriter(excelBuffer, engine='xlsxwriter') as writer:
+    #
+    #     appRankingDF.to_excel(writer, sheet_name='筆頭出願人', index=False)
+    #     IPCmgRankingDF.to_excel(writer, sheet_name='主分類（mg）', index=False)
+    #     IPCsgRankingDF.to_excel(writer, sheet_name='主分類（sg）', index=False)
+    #     # heatmapDF.to_excel(writer, sheet_name='ヒートマップ', index=False)
+    #     formattedDF.to_excel(writer, sheet_name='データセット', index=False)
+    #     writer._save()
+
+#    xlsx = excelBuffer.getvalue()
+
+    # 一時フォルダの作成
+#    tmpDir =  tempfile.NamedTemporaryFile()
+#    xlsx = os.path.join(tmpDir.name, 'simplepm.xlsx')
+#    writer = pd.ExcelWriter('simplepm.xlsx', engine='xlswriter')
+#        with pd.ExcelWriter(excelBuffer, engine='xlsxwriter') as writer:
+#    with pd.ExcelWriter(os.path.join(tmpDir.name, 'simplepm.xlsx'), engine='xlsxwriter') as writer:
+#    with pd.ExcelWriter('simplepm.xlsx', engine='xlsxwriter') as writer:
+
+        # appRankingDF.to_excel(writer, sheet_name='筆頭出願人', index=False)
+        # IPCmgRankingDF.to_excel(writer, sheet_name='主分類（mg）', index=False)
+        # IPCsgRankingDF.to_excel(writer, sheet_name='主分類（sg）', index=False)
+        # # heatmapDF.to_excel(writer, sheet_name='ヒートマップ', index=False)
+        # formattedDF.to_excel(writer, sheet_name='データセット', index=False)
+        # writer._save()
+
+
+    # st.download_button(
+    #     label="ダウンロード",
+    #     data=xlsx,
+    #     file_name="SimplePatentMap.xlsx",
+    #     mime='application/octet-stream'
+    # )
+    # tmpDir.close()
+    # writer.close()
+        # #excelBufferにエクセルファイルの実態を持たせることには成功している。
+        #あとはこれを如何にに圧縮フォルダに渡すか。
+
+        # zip_stream = BytesIO()
+        # # ファイルに書き出す代わりに zip_stream に zip 圧縮したデータを出力
+        # with zipfile.ZipFile(zip_stream, 'w', compression=zipfile.ZIP_DEFLATED) as new_zip:
+        #     new_zip.write('simplepm.xlsx')
+        #
+        #     st.download_button(
+        #         label="ダウンロード",
+        #         data=new_zip,
+        #         file_name="SimplePatentMap.xlsx",
+        #         mime='application/octet-stream'
+        #     )
+
+    # 一時フォルダに画像ファイルを書き込む
+    # zipオブジェクトを作成する
+    # 一時フォルダの全ファイル、または一時フォルダごとzipオブジェクトに追加する
+    # ダウンロードボタンにzipオブジェクトを渡して表示する
+    #一時フォルダのクローズ
+
+    # #zipファイルオブジェクトの生成
+    # with zipfile.ZipFile('simplepm.zip', 'w', compression=zipfile.ZIP_DEFLATED) as zip:
+    #     zip.write(xlsx, 'simplepm.xlsx')
+    #
+    #     st.download_button(
+    #         label="ダウンロード",
+    #         data=zip,
+    #         file_name="simplepm.zip",
+    #         mime='application/octet-stream'
+    #     )
+
+    #tmpDir.cleanup()
+
+
+
+
+
+
+#    buffer = BytesIO()
+#    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+    excelBuffer = BytesIO()
+    with pd.ExcelWriter(excelBuffer, engine='xlsxwriter') as writer:
         # Write each dataframe to a different worksheet.
         appRankingDF.to_excel(writer, sheet_name='筆頭出願人', index=False)
         IPCmgRankingDF.to_excel(writer, sheet_name='主分類（mg）', index=False)
         IPCsgRankingDF.to_excel(writer, sheet_name='主分類（sg）', index=False)
         # heatmapDF.to_excel(writer, sheet_name='ヒートマップ', index=False)
         formattedDF.to_excel(writer, sheet_name='データセット', index=False)
+        writer._save()
+        xlsx = excelBuffer.getvalue()
+
+        with zipfile.ZipFile('simplepm.zip', 'w') as _zip:
+            _zip.writestr('simplepm.xlsx', xlsx)
+            st.download_button(
+                label="ダウンロード",
+                data=_zip,
+                file_name='simplepm.zip',
+                mime='application/octet-stream'
+            )
 
     st.write(formattedDF)
 
-    st.download_button(
-        label="ダウンロード",
-        data=buffer,
-        file_name="SimplePatentMap.xlsx",
-        mime='application/octet-stream'
-    )
+    # st.download_button(
+    #     label="ダウンロード",
+    #     data=excelBuffer,
+    #     file_name="SimplePatentMap.xlsx",
+    #     mime='application/octet-stream'
+    # )
+
+
+    # st.download_button(
+    #     label="ダウンロード",
+    #     data=xlsx,
+    #     file_name="SimplePatentMap.xlsx",
+    #     mime='application/octet-stream'
+    # )
+
+    # st.download_button(
+    #     label="ダウンロード",
+    #     data=buffer,
+    #     file_name="SimplePatentMap.xlsx",
+    #     mime='application/octet-stream'
+    # )
 
 
 
