@@ -36,41 +36,51 @@ class SimplePatentMap:
         self.df = df
 
     def IPCs(self, series):
-        mainIPCmg = []
-        mainIPCsg = []
         regEXP = re.compile('(([A-H]\d\d[A-Z]\d+/)\d+)')
 
+        mainIPCmg = []
+        mainIPCsg = []
+        othersMg = ''
+        othersSg = ''
+
         for FIs in series:
-
-            try:
-                IPCs = regEXP.findall(FIs)
-            except: #FIが記載されていない場合
-                a=0
-
-            else: #FIが記載されている場合（通常処理）
-                mainIPC = IPCs.pop(0)
-                #主分類はここで処理されている
+            # FI列の処理
+            ipcs = regEXP.findall(FIs)
+            # IPCのフォーマットにマッチしたFIがあった場合
+            if ipcs:
+                # 主分類を取得
+                mainIPC = ipcs.pop(0)
                 mainIPCmg.append(mainIPC[1])
                 mainIPCsg.append(mainIPC[0])
 
-                #主分類以外を抽出する
-                sg = []
-                mg = []
-                for list in IPCs:
-                    sg.append(list[0])
-                    mg.append(list[1])
+                # 主分類以外のIPCの処理
+                # 主分類以外のIPCの取得
 
-                #重複を削除する。
-                sg = dict.fromkeys(sg)
-                mg = dict.fromkeys(mg)
+                otherIPCmg = []
+                otherIPCsg = []
+#                print(ipcs)
+                for other in ipcs:
 
-                sg = ';'.join(sg)
-                mg = ';'.join(mg)
+                    otherIPCmg.append(other[1])
+                    otherIPCsg.append(other[0])
 
-                df['主文類以外（mg）'] = mg
-                df['主文類以外（sg）'] = sg
+                # 重複したIPCの削除
+                otherIPCmg = list(dict.fromkeys(otherIPCmg))
+                otherIPCsg = list(dict.fromkeys(otherIPCsg))
 
-        return mainIPCmg, mainIPCsg, mg, sg
+                otherIPCmg = ';'.join(otherIPCmg)
+                otherIPCsg = ';'.join(otherIPCsg)
+#                print(otherIPCmg)
+
+            else:
+                print("result",len(ipcs))
+                mainIPCmg.append('not FI')
+                mainIPCsg.append('not FI')
+                othersMg = 'not FI'
+                othersSg = 'not FI'
+
+        return mainIPCmg, mainIPCsg, otherIPCmg, otherIPCsg
+
 
     def applicants(self, series):
         mainApp = []
@@ -212,35 +222,15 @@ with st.sidebar:
     st.markdown("[データセット](https://github.com/simplepatentmap2023/dataset)")
     st.markdown("[J-PlatPat](https://www.j-platpat.inpit.go.jp/)")
 
-    # sample_btn = st.button('sample', key='sample_btn')
-    # if sample_btn:
-    #     df = pd.read_csv('sampleInStud.csv')
-
 uploaded_files = st.file_uploader("CSVファイルを選択して下さい", type='csv', accept_multiple_files=True)
 for uploaded_file in uploaded_files:
     df = pd.concat([df, pd.read_csv(uploaded_file)])
 
-#    st.session_state['dataframe']=True
 
 st.text('CO2の吸収分離に関する特許情報（20010101-20221231）をサンプルとして表示します。')
 if st.button('sample'):
-#    st.session_state['sample_btn'] = True
-    #print([f'読み込んだCSVは{file}' for file in glob.glob('./sample/*.csv')])
     for sample in glob.glob('./sample/*.csv'):
         df = pd.concat([df, pd.read_csv(sample)])
-#df = pd.read_csv('sampleInStud.csv')
-
-
-
-# elif st.session_state['sample_btn'] == True:
-#     if st.button('クリア'):
-#         df.drop('all')
-#         st.session_state['sample_btn'] = False
-# else:
-#     st.text('スタッド溶接に関する特許情報をサンプルとして表示します。')
-#     if st.button('sample'):
-#         st.session_state['sample_btn'] = True
-#         df = pd.read_csv('sampleInStud.csv')
 
 
 if len(df) > 1:
@@ -250,133 +240,21 @@ if len(df) > 1:
     IPCmgRankingDF = spm.ranking(formattedDF, '主分類（mg）')
     IPCsgRankingDF = spm.ranking(formattedDF, '主分類（sg）')
 
-
-    # excelBuffer = BytesIO()
-    # with pd.ExcelWriter(excelBuffer, engine='xlsxwriter') as writer:
-    #
-    #     appRankingDF.to_excel(writer, sheet_name='筆頭出願人', index=False)
-    #     IPCmgRankingDF.to_excel(writer, sheet_name='主分類（mg）', index=False)
-    #     IPCsgRankingDF.to_excel(writer, sheet_name='主分類（sg）', index=False)
-    #     # heatmapDF.to_excel(writer, sheet_name='ヒートマップ', index=False)
-    #     formattedDF.to_excel(writer, sheet_name='データセット', index=False)
-    #     writer._save()
-
-#    xlsx = excelBuffer.getvalue()
-
-    # 一時フォルダの作成
-#    tmpDir =  tempfile.NamedTemporaryFile()
-#    xlsx = os.path.join(tmpDir.name, 'simplepm.xlsx')
-#    writer = pd.ExcelWriter('simplepm.xlsx', engine='xlswriter')
-#        with pd.ExcelWriter(excelBuffer, engine='xlsxwriter') as writer:
-#    with pd.ExcelWriter(os.path.join(tmpDir.name, 'simplepm.xlsx'), engine='xlsxwriter') as writer:
-#    with pd.ExcelWriter('simplepm.xlsx', engine='xlsxwriter') as writer:
-
-        # appRankingDF.to_excel(writer, sheet_name='筆頭出願人', index=False)
-        # IPCmgRankingDF.to_excel(writer, sheet_name='主分類（mg）', index=False)
-        # IPCsgRankingDF.to_excel(writer, sheet_name='主分類（sg）', index=False)
-        # # heatmapDF.to_excel(writer, sheet_name='ヒートマップ', index=False)
-        # formattedDF.to_excel(writer, sheet_name='データセット', index=False)
-        # writer._save()
-
-
-    # st.download_button(
-    #     label="ダウンロード",
-    #     data=xlsx,
-    #     file_name="SimplePatentMap.xlsx",
-    #     mime='application/octet-stream'
-    # )
-    # tmpDir.close()
-    # writer.close()
-        # #excelBufferにエクセルファイルの実態を持たせることには成功している。
-        #あとはこれを如何にに圧縮フォルダに渡すか。
-
-        # zip_stream = BytesIO()
-        # # ファイルに書き出す代わりに zip_stream に zip 圧縮したデータを出力
-        # with zipfile.ZipFile(zip_stream, 'w', compression=zipfile.ZIP_DEFLATED) as new_zip:
-        #     new_zip.write('simplepm.xlsx')
-        #
-        #     st.download_button(
-        #         label="ダウンロード",
-        #         data=new_zip,
-        #         file_name="SimplePatentMap.xlsx",
-        #         mime='application/octet-stream'
-        #     )
-
-    # 一時フォルダに画像ファイルを書き込む
-    # zipオブジェクトを作成する
-    # 一時フォルダの全ファイル、または一時フォルダごとzipオブジェクトに追加する
-    # ダウンロードボタンにzipオブジェクトを渡して表示する
-    #一時フォルダのクローズ
-
-    # #zipファイルオブジェクトの生成
-    # with zipfile.ZipFile('simplepm.zip', 'w', compression=zipfile.ZIP_DEFLATED) as zip:
-    #     zip.write(xlsx, 'simplepm.xlsx')
-    #
-    #     st.download_button(
-    #         label="ダウンロード",
-    #         data=zip,
-    #         file_name="simplepm.zip",
-    #         mime='application/octet-stream'
-    #     )
-
-    #tmpDir.cleanup()
-
-
-
-
-
-
-#    buffer = BytesIO()
-#    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
     excelBuffer = BytesIO()
     with pd.ExcelWriter(excelBuffer, engine='xlsxwriter') as writer:
-        # Write each dataframe to a different worksheet.
+
         appRankingDF.to_excel(writer, sheet_name='筆頭出願人', index=False)
         IPCmgRankingDF.to_excel(writer, sheet_name='主分類（mg）', index=False)
         IPCsgRankingDF.to_excel(writer, sheet_name='主分類（sg）', index=False)
         # heatmapDF.to_excel(writer, sheet_name='ヒートマップ', index=False)
         formattedDF.to_excel(writer, sheet_name='データセット', index=False)
         writer._save()
+
         xlsx = excelBuffer.getvalue()
 
-        with zipfile.ZipFile('simplepm.zip', 'w') as _zip:
-            _zip.writestr('simplepm.xlsx', xlsx)
-            st.download_button(
-                label="ダウンロード",
-                data=_zip,
-                file_name='simplepm.zip',
-                mime='application/octet-stream'
-            )
-
-    st.write(formattedDF)
-
-    # st.download_button(
-    #     label="ダウンロード",
-    #     data=excelBuffer,
-    #     file_name="SimplePatentMap.xlsx",
-    #     mime='application/octet-stream'
-    # )
-
-
-    # st.download_button(
-    #     label="ダウンロード",
-    #     data=xlsx,
-    #     file_name="SimplePatentMap.xlsx",
-    #     mime='application/octet-stream'
-    # )
-
-    # st.download_button(
-    #     label="ダウンロード",
-    #     data=buffer,
-    #     file_name="SimplePatentMap.xlsx",
-    #     mime='application/octet-stream'
-    # )
-
-
-
     #ランキングデータフレームを可視化
-    fig1 = spm.drawBarh(df=appRankingDF, title='筆頭出願人/権利者', to=30,barColor='navajowhite', BGColor='oldlace')
-    fig2 = spm.drawBarh(df=IPCmgRankingDF, title='主分類（mg）', to=30, barColor='darkgrey', BGColor='whitesmoke')
+    fig1 = spm.drawBarh(df=appRankingDF, title='筆頭出願人/権利者', to=20,barColor='navajowhite', BGColor='oldlace')
+    fig2 = spm.drawBarh(df=IPCmgRankingDF, title='主分類（mg）', to=20, barColor='darkgrey', BGColor='whitesmoke')
     fig3 = spm.drawWordCloud(df = df, columns = '発明の名称')
 
     fig1
@@ -386,3 +264,10 @@ if len(df) > 1:
     if '要約' in df.columns:
         fig4 = spm.drawWordCloud(df = df, columns = '要約')
         fig4
+
+    st.download_button(
+        label="ダウンロード",
+        data=xlsx,
+        file_name="SimplePatentMap.xlsx",
+        mime='application/octet-stream'
+    )
