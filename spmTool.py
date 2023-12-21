@@ -140,10 +140,14 @@ class SimplePatentMap:
             xticks.append(':'.join([str(int(rank)), df[title][i+1]]))
         xticks.reverse()
         value = df['件数'][::-1]
-        fig = plt.figure(figsize=(12, 8), tight_layout = True)  # ...1
+#        fig = plt.figure(figsize=(12, 8), tight_layout = True)  # ...1
+        fig = plt.figure(figsize=(12, 8))  # ...1
         ax = fig.add_subplot(111)  # ...2
         graph = ax.barh(xticks, value, label=title, color=barColor)  # ...3
         ax.bar_label(graph, labels=value, padding=3, fontsize=8)
+        if len(df) > 20:
+            plt.tick_params(labelsize= 400 / len(df))
+
         plt.gca().spines['right'].set_visible(False)
         plt.gca().spines['top'].set_visible(False)
         plt.title(title)
@@ -252,6 +256,13 @@ if len(df) > 1:
 
         xlsx = excelBuffer.getvalue()
 
+        st.download_button(
+            label="ダウンロード",
+            data=xlsx,
+            file_name="SimplePatentMap.xlsx",
+            mime='application/octet-stream'
+        )
+
     #ランキングデータフレームを可視化
     fig1 = spm.drawBarh(df=appRankingDF, title='筆頭出願人/権利者', to=20,barColor='navajowhite', BGColor='oldlace')
     fig2 = spm.drawBarh(df=IPCmgRankingDF, title='主分類（mg）', to=20, barColor='darkgrey', BGColor='whitesmoke')
@@ -265,9 +276,4 @@ if len(df) > 1:
         fig4 = spm.drawWordCloud(df = df, columns = '要約')
         fig4
 
-    st.download_button(
-        label="ダウンロード",
-        data=xlsx,
-        file_name="SimplePatentMap.xlsx",
-        mime='application/octet-stream'
-    )
+
